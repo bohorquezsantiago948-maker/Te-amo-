@@ -1,102 +1,249 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Palabras de amor cayendo</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: linear-gradient(#1a0033, #330066);
-      height: 100vh;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    .fall {
-      position: absolute;
-      top: -50px;
-      animation: fall linear forwards;
-      white-space: nowrap;
-      text-shadow: 0 0 10px rgba(255,255,255,0.3);
-    }
-    @keyframes fall {
-      0% { transform: translateY(-50px); opacity: 1; }
-      100% { transform: translateY(110vh); opacity: 0.8; }
-    }
-    .music-control {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,0.2);
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 14px;
-      color: white;
-      cursor: pointer;
-    }
-    .music-iframe {
-      display: block;
-      margin: 20px auto 0 auto;
-      border: none;
-      border-radius: 15px;
-      box-shadow: 0 0 10px #222;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .calculator {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            width: 320px;
+        }
+
+        .display {
+            background: #2d3436;
+            color: #00ff88;
+            font-size: 2.5em;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: right;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+            word-break: break-all;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 20px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .number {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .number:hover {
+            background: #e0e0e0;
+        }
+
+        .operator {
+            background: #667eea;
+            color: white;
+        }
+
+        .operator:hover {
+            background: #5568d3;
+        }
+
+        .equals {
+            background: #00ff88;
+            color: #2d3436;
+            grid-column: span 2;
+        }
+
+        .equals:hover {
+            background: #00dd6f;
+        }
+
+        .clear {
+            background: #ff6b6b;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .clear:hover {
+            background: #ee5a52;
+        }
+
+        .delete {
+            background: #ffa502;
+            color: white;
+        }
+
+        .delete:hover {
+            background: #ff9500;
+        }
+    </style>
 </head>
 <body>
-  <!-- Música de fondo con YouTube -->
-  <iframe class="music-iframe" width="320" height="180" src="https://www.youtube.com/embed/D94triePAJE?autoplay=1&loop=1&playlist=D94triePAJE" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button class="delete" onclick="deleteLast()">DEL</button>
+            <button class="operator" onclick="appendOperator('/')">/</button>
+            <button class="operator" onclick="appendOperator('*')">×</button>
+            
+            <button class="number" onclick="appendNumber('7')">7</button>
+            <button class="number" onclick="appendNumber('8')">8</button>
+            <button class="number" onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="appendOperator('-')">−</button>
+            
+            <button class="number" onclick="appendNumber('4')">4</button>
+            <button class="number" onclick="appendNumber('5')">5</button>
+            <button class="number" onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="appendOperator('+')">+</button>
+            
+            <button class="number" onclick="appendNumber('1')">1</button>
+            <button class="number" onclick="appendNumber('2')">2</button>
+            <button class="number" onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="appendOperator('.')">.</button>
+            
+            <button class="number" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
 
-  <div class="music-control" onclick="toggleMusic()">🎶 Mostrar/Ocultar Música</div>
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '0';
+        let previousInput = '';
+        let operator = null;
+        let shouldResetDisplay = false;
 
-  <script>
-    const words = [
-      "achis", "te amo", "labubu", "uwu", "linda muchachita",
-      "Mariana", "ghunther", "chofri", "mi vida", "corazón",
-      "eres mi todo", "preciosa", "amor eterno", "te extraño",
-      "mi cielo", "mi reina", "eres única"
-    ];
-    const symbols = ["❤","★","💕","✨","💖"];
-
-    function random(min, max) {
-      return Math.random() * (max - min) + min;
-    }
-
-    function createFallingItem(text, isWord = true) {
-      const el = document.createElement("div");
-      el.className = "fall";
-      el.textContent = text;
-
-      el.style.left = random(0, window.innerWidth - 50) + "px";
-      el.style.fontSize = isWord ? random(18, 40) + "px" : random(14, 28) + "px";
-      el.style.color = isWord ? "#ff99cc" : (text.includes("❤") || text.includes("💕") || text.includes("💖") ? "red" : "yellow");
-
-      const duration = random(4, 10);
-      el.style.animationDuration = duration + "s";
-
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), duration * 1000);
-    }
-
-    setInterval(() => {
-      for (let i = 0; i < 3; i++) {
-        if (Math.random() < 0.6) {
-          createFallingItem(words[Math.floor(Math.random() * words.length)], true);
-        } else {
-          createFallingItem(symbols[Math.floor(Math.random() * symbols.length)], false);
+        function updateDisplay() {
+            display.textContent = currentInput;
         }
-      }
-    }, 400);
 
-    // Mostrar/Ocultar reproductor de música
-    const musicIframe = document.querySelector('.music-iframe');
-    let musicVisible = true;
-    function toggleMusic() {
-      musicVisible = !musicVisible;
-      musicIframe.style.display = musicVisible ? 'block' : 'none';
-    }
-  </script>
+        function appendNumber(num) {
+            if (shouldResetDisplay) {
+                currentInput = num;
+                shouldResetDisplay = false;
+            } else {
+                if (currentInput === '0' && num !== '.') {
+                    currentInput = num;
+                } else if (num === '.' && currentInput.includes('.')) {
+                    return;
+                } else {
+                    currentInput += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== null && !shouldResetDisplay) {
+                calculate();
+            }
+            previousInput = currentInput;
+            operator = op;
+            shouldResetDisplay = true;
+        }
+
+        function calculate() {
+            if (operator === null || shouldResetDisplay) {
+                return;
+            }
+
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            switch(operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = current !== 0 ? prev / current : 0;
+                    break;
+                case '.':
+                    return;
+                default:
+                    return;
+            }
+
+            currentInput = result.toString();
+            operator = null;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            previousInput = '';
+            operator = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            updateDisplay();
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+            if (e.key === '.') appendNumber('.');
+            if (e.key === '+' || e.key === '-') appendOperator(e.key);
+            if (e.key === '*') appendOperator('*');
+            if (e.key === '/') { e.preventDefault(); appendOperator('/'); }
+            if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); }
+            if (e.key === 'Backspace') { e.preventDefault(); deleteLast(); }
+            if (e.key === 'Escape') clearDisplay();
+        });
+    </script>
 </body>
 </html>
